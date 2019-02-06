@@ -23,8 +23,15 @@ app.get('/', (req: any, res: any) => {
 
 type RoomAction = {
     action: any
-    userId: string
-    roomId: string
+    gameId: string
+}
+
+function updateGameState(gameId: string, gameState: GameState, lastAction: any) {
+    io.in(gameId).emit('GAME_UPDATE', {
+        lastAction,
+        state: gameState
+    });
+    gameStates[gameId] = gameState;
 }
 
 // whenever a user connects on port 3000 via
@@ -37,21 +44,28 @@ io.on('connection', function(socket: any){
 
   socket.on('GAME_ACTION', (payload: RoomAction) => {
 
-    if (!gameStates[payload.roomId]) {
-        gameStates[payload.roomId] = getDefaultGameState();
+    if (!gameStates[payload.gameId]) {
+        gameStates[payload.gameId] = getDefaultGameState();
     }
 
     if (_.get(payload, 'action.type') === 'JoinGameAction') {
         io.sockets.manager.roomClients[socket.id].map((roomId: string) => socket.leave(roomId));
-        socket.join(payload.roomId);
+        socket.join(payload.gameId);
     }
+    let oldGameState = gameStates[payload.gameId];
+    let nextGameState = gameStateReducer(payload.action, oldGameState);
 
-    gameStates[payload.roomId] = gameStateReducer(payload.action, gameStates[payload.roomId]);
+    updateGameState(payload.gameId, nextGameState, payload.action);
 
-    io.in(payload.roomId).emit('GAME_UPDATE', {
-        lastAction: payload.action,
-        state: gameStates[payload.roomId]
-    })
+    if (_.get(payload, 'action.type') === 'PlayLowestNumberAction' && nextGameState.gameStatus === 'WAITING_FOR_NEXT_ROUND') {
+        setTimeout(() => {
+            let nextRoundGameState = gameStateReducer({
+                type: 'BeginNextRoundAction'
+            }, nextGameState);
+
+            updateGameState(payload.gameId, nextRoundGameState, payload.action);
+        }, 5000);    
+    }
   });
 });
 

@@ -1,6 +1,8 @@
 import produce from "immer"
 const _ = require('lodash');
 
+const max_players = 5;
+
 export type GameState = {
     round: number
     gameLeaderPlayerId: string
@@ -43,23 +45,29 @@ type JoinGameAction = {
     userId: string
 }
 
-function getStartingHand(numPlayers: number): number[][] {
+type BeginNextRoundAction = {
+    type: 'BeginNextRoundAction'
+}
+
+function getStartingHand(numPlayers: number, handSize: number): number[][] {
     
     let numbersFromZeroToHundred = _.range(1, 101);
     let shuffledNumbers = shuffle(numbersFromZeroToHundred);
 
-    let handSize = 100/numPlayers;
-
     let startIndex = 0;
     return _.range(0, numPlayers).map((playerNumber: number) => {
-        let handSizeRounded: number = playerNumber == 0 ? Math.ceil(handSize): Math.floor(handSize);
-        return shuffledNumbers.slice(startIndex, startIndex + handSizeRounded);
+        let endIndex = startIndex + handSize;
+        let hand =  shuffledNumbers.slice(startIndex, endIndex);
+        startIndex = endIndex;
+        return hand;
+        
     });
 }
 
 function canExecuteJoinGameAction(action: JoinGameAction, state: GameState) {
     return state.gameStatus === 'HAS_NOT_BEGUN'
-        && !state.playerStates[action.userId];
+        && !state.playerStates[action.userId]
+        && Object.keys(state.playerStates).length < 5;
 }
 
 function canExecutePlayLowestNumberAction(action: PlayLowestNumberAction, state: GameState): boolean {
@@ -74,6 +82,34 @@ function canExecuteBeginGameAction(action: BeginGameAction, state: GameState): b
         && state.gameStatus === 'HAS_NOT_BEGUN';
 }
 
+export function getMaxRounds(state: GameState) {
+    const numPlayers = Object.keys(state.playerStates).length;
+    //2 => 12 rounds
+    //3 => 10 rounds
+    //4 => 8 rounds
+    //5 => 6 rounds
+    if (numPlayers <= 2) {
+        return 12;
+    } else if (numPlayers === 3) {
+        return 10;
+    } else if (numPlayers === 4) {
+        return 8;
+    } else if (numPlayers === 5) {
+        return 6;
+    }
+}
+
+export function doAllPlayersHaveZeroCards(state: GameState) {
+    const allPlayers = Object.keys(state.playerStates).map(id => state.playerStates[id]);
+
+    return allPlayers.length > 0
+        && allPlayers.every(p => p.cards.length === 0);
+}
+
+function canExecuteBeginNextRoundAction(action: BeginNextRoundAction, state: GameState): boolean {
+    return doAllPlayersHaveZeroCards(state);
+}
+
 export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
     return produce(stateIn, (gameState) => {
         if (actionIn.type === 'PlayLowestNumberAction' && canExecutePlayLowestNumberAction(actionIn, gameState)) {
@@ -82,20 +118,27 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             let numberToPlay = userState.cards[0];
             userState.cards.shift();
             const numDiscarded = gameState.discardedCards.length;
-            if (numDiscarded < 99 && numDiscarded > 0 && gameState.discardedCards[numDiscarded - 1] < numberToPlay) {
+            if (numDiscarded > 0 && gameState.discardedCards[numDiscarded - 1] < numberToPlay) {
                 gameState.gameStatus = 'LOST';
-            } else if (numDiscarded > 99) {
+            } else if (doAllPlayersHaveZeroCards(gameState) && gameState.round + 1 === getMaxRounds(gameState)) {
                 gameState.gameStatus = 'WON'
+            } else if (doAllPlayersHaveZeroCards(gameState)) {
+                gameState.gameStatus = 'WAITING_FOR_NEXT_ROUND';
             }
             gameState.discardedCards.push(numberToPlay);
             
-        } else if (actionIn.type === 'BeginGameAction' && canExecuteBeginGameAction(actionIn, gameState)) {
+        } else if (
+            (actionIn.type === 'BeginGameAction' && canExecuteBeginGameAction(actionIn, gameState))
+            || (actionIn.type === 'BeginNextRoundAction' && canExecuteBeginNextRoundAction(actionIn, gameState))
+            ) {
             let action: BeginGameAction = actionIn;
+            gameState.round = gameState.round + 1;
             gameState.gameStatus = 'IN_PROGRESS';
+            gameState.discardedCards = [];
             let playerIds = Object.keys(gameState.playerStates);
-            getStartingHand(playerIds.length).forEach((numbers, index) => {
+            getStartingHand(playerIds.length, gameState.round).forEach((numbers, index) => {
                 gameState.playerStates[playerIds[index]].cards = numbers;
-            })
+            });
         } else if (actionIn.type === 'JoinGameAction' && canExecuteJoinGameAction(actionIn, gameState)) {
             let action: JoinGameAction = actionIn;
             gameState.playerStates[action.userId] = {
