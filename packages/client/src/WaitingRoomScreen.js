@@ -4,7 +4,7 @@ import './App.css';
 
 class WaitingRoomScreen extends Component {
 
-  startGame() {
+  beginGame() {
 
   }
 
@@ -12,8 +12,9 @@ class WaitingRoomScreen extends Component {
     return (
       <div className="gameBody">
         <h1>The Mind</h1>
-        <p>Connect to the collective mind</p>
-        <button onClick={this.startGame.bind(this)}>Start Game</button>
+        <p>Waiting for all players to join...</p>
+        <br />
+        <button onClick={this.beginGame.bind(this)}>Start Game</button>
       </div>
     );
   }

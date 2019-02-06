@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import JoinGameScreen from './JoinGameScreen';
+import WaitingRoomScreen from './WaitingRoomScreen';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<JoinGameScreen />, document.getElementById('root'));
