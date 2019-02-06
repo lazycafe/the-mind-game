@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:3000');
+const socket = io('https://the-mind-server.now.sh');
 
 
 //actions to emit
 //join game <-- this handles leaving any games you might already be in
 
-class GameStateProvider extends Component {
+export default class GameStateProvider extends Component {
     constructor(...args) {
         super(...args);
     }
@@ -18,7 +18,7 @@ class GameStateProvider extends Component {
                 gameState: state
             });
         }
-
+        window.socket = socket;
         socket.on('GAME_UPDATE', this.onGameUpdate);
     }
 
@@ -69,17 +69,17 @@ class GameStateProvider extends Component {
     render() {
         return (
             <div>
-                {this.props.children({
+                {/*this.props.children({
                     playLowestCard: this.playLowestCard.bind(this),
                     startGame: this.startGame.bind(this),
                     joinGame: this.joinGame.bind(this),
                     refresh: this.refresh.bind(this),
                     lastAction: this.state.lastAction,
                     gameState: this.state.gameState
-                })}
+                })*/}
+                {this.props.children}
             </div>
         );
     }
 }
 
-export default JoinGameScreen;

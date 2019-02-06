@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc index.ts --outDir ./lib/",
+    "build-dev": "tsc index.ts --outDir ./lib/",
     "start": "node lib/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "immer": "^2.0.0",
     "lodash": "^4.17.11",
