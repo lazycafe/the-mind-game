@@ -12,6 +12,7 @@
 
 .gameBody {
 	max-width: 350px;
+	color: var(--nickel);
 }
 
 body {
@@ -22,19 +23,8 @@ body {
 	justify-content: center;
 }
 
-button {
-	border: 1px solid white;
-	border-radius: 10px;
-	background-color: var(--lightgreen);
-	text-align: center;
-	font-family: var(--courier);
-	font-size: 16px;
-	padding-left: 58px;
-	padding-right: 58px;
-	padding-top: 8px;
-	padding-bottom: 8px;
-	font-weight: bold;
-	cursor: pointer;
+h1, h3 {
+	color: black;
 }
 
 input {
@@ -46,4 +36,45 @@ input {
 	box-shadow: none;
 	border: 1px solid black;
 	font-family: var(--courier);
+}
+
+button {
+	border: 1px solid white;
+	border-radius: 10px;
+	background-color: var(--yellow);
+	text-align: center;
+	font-family: var(--courier);
+	font-size: 16px;
+	font-weight: bold;
+	cursor: pointer;
+	width: 206px;
+	height: 50px;
+}
+
+.roundAndLives {
+	color: var(--lightgreen);
+}
+
+.gameSection {
+	margin-bottom: 35px;
+}
+
+.playerList {
+	display: flex;
+	justify-content: center;
+}
+
+.playerListName {
+	font-weight: bold;
+	margin-right: 20px;
+}
+
+.cardNumber {
+	font-size: 35px;
+	font-weight: bold;
+	color: var(--shamrock);
+}
+
+h3 {
+	margin-bottom: 10px;
 }
