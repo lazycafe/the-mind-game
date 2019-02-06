@@ -1,110 +1,56 @@
-import produce from "immer"
-import _ from 'lodash';
-type GameState = {
-    numPlayers: number
-    gameLeaderPlayerId: string
-    gameStatus: 'HAS_NOT_BEGUN' | 'IN_PROGRESS' | 'LOST' | 'WON',
-    playerStates: {
-        [playerId: string]: PlayerState
-    },
-    discardedCards: number[]
-    lives: number
-}
+const express = require("express");
+import * as socketio from "socket.io";
+import * as path from "path"
+const _ = require('lodash');
+import { GameState, getDefaultGameState, gameStateReducer } from "./gameLogic";
 
-type PlayerState = {
-    id: string
-    cards: number[]
-}
+const gameStates: {[gameId: string]: GameState} = {};
 
-function getDefaultState(): GameState {
-    return {
-        numPlayers: 0,
-        gameLeaderPlayerId: '',
-        gameStatus: 'HAS_NOT_BEGUN',
-        playerStates: {},
-        discardedCards: [],
-        lives: 0
-    }
-}
+const app = express();
+app.set("port", process.env.PORT || 3000);
 
-type PlayLowestNumberAction = {
-    type: 'PlayLowestNumberAction'
+let http = require('http').Server(app);
+// set up socket.io and bind it to our
+// http server.
+let io = require('socket.io')(http);
+
+
+app.get('/', (req: any, res: any) => {
+  res.json(gameStates);
+});
+
+
+
+type RoomAction = {
+    action: any
     userId: string
+    roomId: string
 }
 
-type BeginGameAction = {
-    type: 'BeginGameAction'
-    userId: string
-}
+// whenever a user connects on port 3000 via
+// a websocket, log that a user has connected
+io.on('connection', function(socket: any){
 
+  socket.on('GAME_ACTION', (payload: RoomAction) => {
 
-function getStartingNumbers(numPlayers: number): number[][] {
-    
-    let numbersFromZeroToHundred = [];
-    for (let i = 0; i < 100; i++) { numbersFromZeroToHundred.push(i); }
-    let shuffledNumbers = shuffle(numbersFromZeroToHundred);
-
-    let handSize = 100/numPlayers;
-
-
-
-    
-    return [];
-}
-
-function canExecutePlayLowestNumberAction(action: PlayLowestNumberAction, state: GameState): boolean {
-    return state.playerStates[action.userId]
-        && state.playerStates[action.userId].cards.length > 0;
-}
-
-function canExecuteBeginGameAction(action: BeginGameAction, state: GameState): boolean {
-    return action.userId === state.gameLeaderPlayerId
-        &&state.numPlayers > 1
-        && state.gameStatus === 'HAS_NOT_BEGUN';
-}
-
-function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
-    return produce(stateIn, (gameState) => {
-        if (actionIn.type === 'PlayLowestNumberAction' && canExecutePlayLowestNumberAction(actionIn, state)) {
-            let action: PlayLowestNumberAction = actionIn;
-            let userState = gameState.playerStates[action.userId];
-            let numberToPlay = userState.cards[0];
-            userState.cards.shift();
-            const numDiscarded = gameState.discardedCards.length;
-            if (numDiscarded < 99 && numDiscarded > 0 && gameState.discardedCards[numDiscarded - 1] < numberToPlay) {
-                gameState.gameStatus = 'LOST';
-            }
-            gameState.discardedCards.push(numberToPlay);
-            
-        } else if (actionIn.type === 'BeginGameAction' && canExecuteBeginGameAction(actionIn, state)) {
-            let action: BeginGameAction = actionIn;
-            gameState.gameStatus = 'IN_PROGRESS';
-
-    
-        }
-        return gameState;
-    });
-
-}
-
-
-
-/**
- * Shuffles array in place.
- * @param {Array} a items An array containing the items.
- */
-function shuffle(a: any) {
-    var j, x, i;
-    for (i = a.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = a[i];
-        a[i] = a[j];
-        a[j] = x;
+    if (!gameStates[payload.roomId]) {
+        gameStates[payload.roomId] = getDefaultGameState();
     }
-    return a;
-}
 
+    if (_.get(payload, 'action.type') === 'JoinGameAction') {
+        io.sockets.manager.roomClients[socket.id].map((roomId: string) => socket.leave(roomId));
+        socket.join(payload.roomId);
+    }
 
+    gameStates[payload.roomId] = gameStateReducer(payload.action, gameStates[payload.roomId]);
 
+    io.in(payload.roomId).emit('GAME_UPDATE', {
+        lastAction: payload.action,
+        state: gameStates[payload.roomId]
+    })
+  });
+});
 
-
+const server = http.listen(3000, function(){
+  console.log('listening on *:3000');
+});
