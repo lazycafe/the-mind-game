@@ -31,6 +31,10 @@ type RoomAction = {
 // a websocket, log that a user has connected
 io.on('connection', function(socket: any){
 
+    socket.on('ECHO', (payload: any) => {
+        socket.emit('ECHO', payload);
+    });
+
   socket.on('GAME_ACTION', (payload: RoomAction) => {
 
     if (!gameStates[payload.roomId]) {
@@ -51,9 +55,31 @@ io.on('connection', function(socket: any){
   });
 });
 
-const server = http.listen(3000, function(){
-  console.log('listening on *:3000');
+const server = http.listen(1234, function(){
+  console.log('listening on *:1234');
 });
+
+
+
+
+
+const exampleGameState = {
+    round: 1,
+    gameLeaderPlayerId: '',
+    gameStatus: 'IN_PROGRESS',
+    playerStates: {
+        'andrealized': {
+            id: 'andrealized',
+            cards: [15,27,22]
+        },
+        'jmoneyswagtime': {
+            id: 'jmoneyswagtime',
+            cards: [4,89,24]
+        }
+    },
+    discardedCards: [],
+    lives: 0
+}
 
 //usage
 

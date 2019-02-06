@@ -2,9 +2,9 @@ import produce from "immer"
 const _ = require('lodash');
 
 export type GameState = {
-    numPlayers: number
+    round: number
     gameLeaderPlayerId: string
-    gameStatus: 'HAS_NOT_BEGUN' | 'IN_PROGRESS' | 'LOST' | 'WON',
+    gameStatus: 'HAS_NOT_BEGUN' | 'WAITING_FOR_NEXT_ROUND' | 'IN_PROGRESS' | 'LOST' | 'WON',
     playerStates: {
         [playerId: string]: PlayerState
     },
@@ -19,7 +19,7 @@ type PlayerState = {
 
 export function getDefaultGameState(): GameState {
     return {
-        numPlayers: 0,
+        round: 0,
         gameLeaderPlayerId: '',
         gameStatus: 'HAS_NOT_BEGUN',
         playerStates: {},
@@ -64,12 +64,13 @@ function canExecuteJoinGameAction(action: JoinGameAction, state: GameState) {
 
 function canExecutePlayLowestNumberAction(action: PlayLowestNumberAction, state: GameState): boolean {
     return state.playerStates[action.userId]
-        && state.playerStates[action.userId].cards.length > 0;
+        && state.playerStates[action.userId].cards.length > 0
+        && state.gameStatus === 'IN_PROGRESS';
 }
 
 function canExecuteBeginGameAction(action: BeginGameAction, state: GameState): boolean {
     return action.userId === state.gameLeaderPlayerId
-        &&state.numPlayers > 1
+        && Object.keys(state.playerStates).length > 1
         && state.gameStatus === 'HAS_NOT_BEGUN';
 }
 
