@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+
+:root {
+	--yellow: #CBFF4D;
+	--lightgreen: #84DD63;
+	--shamrock: #6BAA75;
+	--nickel: #69747C;
+	--darkgray: #545454;
+	--noto: 'Noto Sans', sans-serif;
+	--courier: 'Courier New', Courier, monospace;
+}
+
+.gameBody {
+	max-width: 350px;
+}
+
+body {
+	background-color: white;
+	text-align: center;
+	font-family: var(--courier);
+	display: flex;
+	justify-content: center;
+}
+
+button {
+	border: 1px solid white;
+	border-radius: 10px;
+	background-color: var(--lightgreen);
+	text-align: center;
+	font-family: var(--courier);
+	font-size: 16px;
+	padding-left: 58px;
+	padding-right: 58px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+input {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+	border-radius: 10px;
+	box-shadow: none;
+	border: 1px solid black;
+	font-family: var(--courier);
+}
