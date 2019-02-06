@@ -14,7 +14,6 @@ class JoinGameScreen extends Component {
         <h1>The Mind</h1>
         <p>Connect to the collective mind. Learn to cooperate to become one.</p>
         <br />
-        <br />
         <p><input id="gameId" placeholder="Game ID" /></p>
         <p><input id="alias" placeholder="Your Alias" /></p>
         <button onClick={this.joinGame.bind(this)}>Join Game</button>
