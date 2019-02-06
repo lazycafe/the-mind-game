@@ -54,3 +54,59 @@ io.on('connection', function(socket: any){
 const server = http.listen(3000, function(){
   console.log('listening on *:3000');
 });
+
+//usage
+
+/*
+
+type PlayLowestNumberAction = {
+    type: 'PlayLowestNumberAction'
+    userId: string
+}
+
+type BeginGameAction = {
+    type: 'BeginGameAction'
+    userId: string
+}
+
+type JoinGameAction = {
+    type: 'JoinGameAction'
+    userId: string
+}
+
+
+
+socket.emit('GAME_ACTION', {
+    gameId: 'my game 1',
+    action: PlayLowestNumberAction | BeginGameAction | JoinGameAction
+})
+
+
+//actions to emit
+//join game <-- this handles leaving any games you might already be in
+socket.emit('GAME_ACTION', {
+    gameId: 'my game 1',
+    action: {
+        type: 'JoinGameAction',
+        userId: 'andrealized'
+    }
+})
+
+//begin game
+socket.emit('GAME_ACTION', {
+    gameId: 'my game 1',
+    action: {
+        type: 'BeginGameAction',
+        userId: 'andrealized'
+    }
+})
+
+//play number
+socket.emit('GAME_ACTION', {
+    gameId: 'my game 1',
+    action: {
+        type: 'PlayLowestNumberAction',
+        userId: 'andrealized'
+    }
+})
+*/
