@@ -23,7 +23,9 @@ function getStartingHand(numPlayers, handSize) {
         var endIndex = startIndex + handSize;
         var hand = shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        return hand.sort();
+        let yay = hand.sort();
+        yay.sort();
+        return yay;
     });
 }
 function canExecuteJoinGameAction(action, state) {
