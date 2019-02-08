@@ -50,7 +50,7 @@ export default function withGameState(Wrapped) {
                 gameId: this.getGameId(),
                 action: {
                     type: 'RefreshAction',
-                    userId: getUserId()
+                    userId: this.getUserId()
                 }
             })
         }
@@ -60,7 +60,7 @@ export default function withGameState(Wrapped) {
                 gameId: this.getGameId(),
                 action: {
                     type: 'JoinGameAction',
-                    userId: getUserId()
+                    userId: this.getUserId()
                 }
             })
         }
@@ -70,7 +70,7 @@ export default function withGameState(Wrapped) {
                 gameId: this.getGameId(),
                 action: {
                     type: 'BeginGameAction',
-                    userId: getUserId()
+                    userId: this.getUserId()
                 }
             })
         }
@@ -80,7 +80,7 @@ export default function withGameState(Wrapped) {
                 gameId: this.getGameId(),
                 action: {
                     type: 'PlayLowestNumberAction',
-                    userId: getUserId()
+                    userId: this.getUserId()
                 }
             });
         }

@@ -3,8 +3,9 @@ exports.__esModule = true;
 var immer_1 = require("immer");
 var _ = require('lodash');
 var max_players = 5;
-function getDefaultGameState() {
+function getDefaultGameState(id) {
     return {
+        id: id,
         round: 0,
         gameLeaderPlayerId: '',
         gameStatus: 'HAS_NOT_BEGUN',
