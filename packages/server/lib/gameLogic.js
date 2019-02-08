@@ -23,7 +23,7 @@ function getStartingHand(numPlayers, handSize) {
         var endIndex = startIndex + handSize;
         var hand = shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        return hand;
+        return hand.sort();
     });
 }
 function canExecuteJoinGameAction(action, state) {
