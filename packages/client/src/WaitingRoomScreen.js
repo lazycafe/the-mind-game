@@ -9,7 +9,7 @@ class WaitingRoomScreen extends Component {
   }
 
   shouldShowStartGameButton() {
-    return this.isLeader() && Object.keys(this.props.gameState.playerStates).length > 2;
+    return this.isLeader() && Object.keys(this.props.gameState.playerStates).length > 1;
   }
 
   render() {

@@ -30,7 +30,7 @@ io.on('connection', function (socket) {
     });
     socket.on('GAME_ACTION', function (payload) {
         if (!gameStates[payload.gameId]) {
-            gameStates[payload.gameId] = gameLogic_1.getDefaultGameState();
+            gameStates[payload.gameId] = gameLogic_1.getDefaultGameState(payload.gameId);
         }
         if (_.get(payload, 'action.type') === 'JoinGameAction') {
             //io.sockets.manager.roomClients[socket.id].map((roomId: string) => socket.leave(roomId));
