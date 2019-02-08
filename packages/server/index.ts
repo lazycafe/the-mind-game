@@ -47,7 +47,7 @@ io.on('connection', function(socket: any){
   socket.on('GAME_ACTION', (payload: RoomAction) => {
 
     if (!gameStates[payload.gameId]) {
-        gameStates[payload.gameId] = getDefaultGameState();
+        gameStates[payload.gameId] = getDefaultGameState(payload.gameId);
     }
 
     if (_.get(payload, 'action.type') === 'JoinGameAction') {
