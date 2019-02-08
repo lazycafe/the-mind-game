@@ -40,6 +40,10 @@ class GameScreen extends Component {
       return <WaitingRoomScreen {...this.props}/>
     } else if (this.props.gameState.gameStatus === 'WAITING_FOR_NEXT_ROUND') {
       return (<h1>Waiting for next round!</h1>);
+    } else if (this.props.gameState.gameStatus === 'LOST') {
+      return (<h1>you lost 😭😭😭😭</h1>)
+    } else if (this.props.gameState.gameStatus === 'WON') {
+      return (<h1>you won 🙌🙌🙌🙌🙌</h1>)
     }
 
     let myCards = exampleGameState.playerStates[myUserId].cards;
