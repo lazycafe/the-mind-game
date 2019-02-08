@@ -24,8 +24,6 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 //     lives: 2
 // }
 
-const myUserId = 'andrealized';
-
 class GameScreen extends Component {
 
   componentDidMount() {
@@ -36,6 +34,7 @@ class GameScreen extends Component {
 
   render() {
     let gameState = this.props.gameState;
+    let myUserId = getUserName();
     console.log('gameState', gameState)
 
     if (!gameState || gameState.round === 0 || !gameState.playerStates[this.myUserId] || gameState.gameStatus === 'HAS_NOT_BEGUN') {
@@ -48,7 +47,7 @@ class GameScreen extends Component {
       return (<h1>you won 🙌🙌🙌🙌🙌</h1>)
     }
 
-    let myCards = gameState.playerStates[getUserName()].cards;
+    let myCards = gameState.playerStates[myUserId].cards;
     let outOfCards = !myCards.length;
 
     return (
