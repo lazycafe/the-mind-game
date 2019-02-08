@@ -117,17 +117,18 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
         if (actionIn.type === 'PlayLowestNumberAction' && canExecutePlayLowestNumberAction(actionIn, gameState)) {
             let action: PlayLowestNumberAction = actionIn;
             let userState = gameState.playerStates[action.userId];
-            let numberToPlay = userState.cards[0];
+            let nextDiscard = userState.cards[0];
             userState.cards.shift();
             const numDiscarded = gameState.discardedCards.length;
-            if (numDiscarded > 0 && gameState.discardedCards[numDiscarded - 1] < numberToPlay) {
+            const lastDiscard = gameState.discardedCards[numDiscarded - 1];
+            if (numDiscarded > 0 && lastDiscard > nextDiscard) {
                 gameState.gameStatus = 'LOST';
             } else if (doAllPlayersHaveZeroCards(gameState) && gameState.round + 1 === getMaxRounds(gameState)) {
                 gameState.gameStatus = 'WON'
             } else if (doAllPlayersHaveZeroCards(gameState)) {
                 gameState.gameStatus = 'WAITING_FOR_NEXT_ROUND';
             }
-            gameState.discardedCards.push(numberToPlay);
+            gameState.discardedCards.push(nextDiscard);
             
         } else if (
             (actionIn.type === 'BeginGameAction' && canExecuteBeginGameAction(actionIn, gameState))
