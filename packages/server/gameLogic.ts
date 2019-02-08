@@ -141,7 +141,8 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             gameState.discardedCards = [];
             let playerIds = Object.keys(gameState.playerStates);
             getStartingHands(playerIds.length, gameState.round).forEach((numbers, index) => {
-                gameState.playerStates[playerIds[index]].cards = numbers;
+                gameState.playerStates[playerIds[index]].cards = numbers.sort();
+                gameState.playerStates[playerIds[index]].cards.sort();
             });
 
             if (actionIn.type === 'BeginGameAction') {
