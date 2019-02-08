@@ -49,7 +49,12 @@ class GameScreen extends Component {
         </div>
       )
     } else if (gameState.gameStatus === 'WON') {
-      return (<h1>you won 🙌🙌🙌🙌🙌</h1>)
+      return (
+        <div>
+          <h1>you won!!!</h1>
+          <a href="/"><button>Join New Game</button></a>
+        </div>
+      )
     }
 
     let myCards = gameState.playerStates[this.myUserId].cards;
