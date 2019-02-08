@@ -15,7 +15,7 @@ function getDefaultGameState(id) {
     };
 }
 exports.getDefaultGameState = getDefaultGameState;
-function getStartingHand(numPlayers, handSize) {
+function getStartingHands(numPlayers, handSize) {
     var numbersFromZeroToHundred = _.range(1, 101);
     var shuffledNumbers = shuffle(numbersFromZeroToHundred);
     var startIndex = 0;
@@ -23,7 +23,9 @@ function getStartingHand(numPlayers, handSize) {
         var endIndex = startIndex + handSize;
         var hand = shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        return hand.sort();
+        var sorted = hand.sort();
+        sorted.sort();
+        return sorted;
     });
 }
 function canExecuteJoinGameAction(action, state) {
@@ -97,7 +99,7 @@ function gameStateReducer(actionIn, stateIn) {
             gameState.gameStatus = 'IN_PROGRESS';
             gameState.discardedCards = [];
             var playerIds_1 = Object.keys(gameState.playerStates);
-            getStartingHand(playerIds_1.length, gameState.round).forEach(function (numbers, index) {
+            getStartingHands(playerIds_1.length, gameState.round).forEach(function (numbers, index) {
                 gameState.playerStates[playerIds_1[index]].cards = numbers;
             });
             if (actionIn.type === 'BeginGameAction') {

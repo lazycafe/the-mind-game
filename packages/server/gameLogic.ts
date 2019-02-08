@@ -51,7 +51,7 @@ type BeginNextRoundAction = {
     type: 'BeginNextRoundAction'
 }
 
-function getStartingHand(numPlayers: number, handSize: number): number[][] {
+function getStartingHands(numPlayers: number, handSize: number): number[][] {
     
     let numbersFromZeroToHundred = _.range(1, 101);
     let shuffledNumbers = shuffle(numbersFromZeroToHundred);
@@ -61,8 +61,9 @@ function getStartingHand(numPlayers: number, handSize: number): number[][] {
         let endIndex = startIndex + handSize;
         let hand =  shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        return hand.sort();
-        
+        let sorted = hand.sort();
+        sorted.sort();
+        return sorted;
     });
 }
 
@@ -139,8 +140,9 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             gameState.gameStatus = 'IN_PROGRESS';
             gameState.discardedCards = [];
             let playerIds = Object.keys(gameState.playerStates);
-            getStartingHand(playerIds.length, gameState.round).forEach((numbers, index) => {
-                gameState.playerStates[playerIds[index]].cards = numbers;
+            getStartingHands(playerIds.length, gameState.round).forEach((numbers, index) => {
+                gameState.playerStates[playerIds[index]].cards = numbers.sort();
+                gameState.playerStates[playerIds[index]].cards.sort();
             });
 
             if (actionIn.type === 'BeginGameAction') {
