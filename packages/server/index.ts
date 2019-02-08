@@ -15,7 +15,7 @@ let http = require('http').Server(app);
 // set up socket.io and bind it to our
 // http server.
 let io = require('socket.io')(http);
-
+//io.set('origins', '*:*');
 
 app.get('/', (req: any, res: any) => {
   res.json(gameStates);
@@ -35,7 +35,7 @@ function updateGameState(gameId: string, gameState: GameState, lastAction: any) 
     });
     gameStates[gameId] = gameState;
 }
-io.set('origins', '*:*');
+
 // whenever a user connects on port 3000 via
 // a websocket, log that a user has connected
 io.on('connection', function(socket: any){
@@ -51,7 +51,7 @@ io.on('connection', function(socket: any){
     }
 
     if (_.get(payload, 'action.type') === 'JoinGameAction') {
-        io.sockets.manager.roomClients[socket.id].map((roomId: string) => socket.leave(roomId));
+        //io.sockets.manager.roomClients[socket.id].map((roomId: string) => socket.leave(roomId));
         socket.join(payload.gameId);
     }
     let oldGameState = gameStates[payload.gameId];

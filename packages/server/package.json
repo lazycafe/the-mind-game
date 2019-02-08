@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-dev": "tsc index.ts --outDir ./lib/",
+    "deploy": "tsc index.ts --outDir ./lib/ && now .",
     "start": "node lib/index.js"
   },
   "author": "",

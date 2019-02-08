@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import withGameState from './withGameState';
+import WaitingRoomScreen from './WaitingRoomScreen';
+import {setUserName, getUserName} from './userNameFunctions';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 const exampleGameState = {
     round: 1,
@@ -25,11 +29,19 @@ const myUserId = 'andrealized';
 
 class GameScreen extends Component {
 
-  joinGame() {
-
+  componentDidMount() {
+    this.myUserId = getUserName();
+    this.gameId = this.props.match.params.id;
+    this.props.joinGame(this.myUserId, this.gameId);
+    console.log(this.props);
   }
 
   render() {
+    if (!this.props.gameState || this.props.gameState.round === 0 || !this.props.gameState.playerStates[this.myUserId] || this.props.gameState.gameStatus === 'HAS_NOT_BEGUN') {
+      return <WaitingRoomScreen {...this.props}/>
+    } else if (this.props.gameState.gameStatus === 'WAITING_FOR_NEXT_ROUND') {
+      return (<h1>Waiting for next round!</h1>);
+    }
 
     let myCards = exampleGameState.playerStates[myUserId].cards;
     let outOfCards = !myCards.length;
@@ -68,7 +80,7 @@ class GameScreen extends Component {
         { !outOfCards &&
           <div className="gameSection">
             <p>Push the button if you think you hold the lowest card in your hand.</p>
-            <button onClick={this.joinGame.bind(this)}>Play Lowest Card</button>
+            <button onClick={this.props.playLowestCard}>Play Lowest Card</button>
           </div>
         }
       </div>
@@ -76,4 +88,4 @@ class GameScreen extends Component {
   }
 }
 
-export default GameScreen;
+export default withGameState(GameScreen);

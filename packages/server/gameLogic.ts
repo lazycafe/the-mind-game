@@ -4,6 +4,7 @@ const _ = require('lodash');
 const max_players = 5;
 
 export type GameState = {
+    id: string
     round: number
     gameLeaderPlayerId: string
     gameStatus: 'HAS_NOT_BEGUN' | 'WAITING_FOR_NEXT_ROUND' | 'IN_PROGRESS' | 'LOST' | 'WON',
@@ -19,8 +20,9 @@ type PlayerState = {
     cards: number[]
 }
 
-export function getDefaultGameState(): GameState {
+export function getDefaultGameState(id: string): GameState {
     return {
+        id,
         round: 0,
         gameLeaderPlayerId: '',
         gameStatus: 'HAS_NOT_BEGUN',

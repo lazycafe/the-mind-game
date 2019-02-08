@@ -4,8 +4,8 @@ import './App.css';
 
 class WaitingRoomScreen extends Component {
 
-  beginGame() {
-
+  isLeader() {
+    return false;
   }
 
   render() {
@@ -14,7 +14,7 @@ class WaitingRoomScreen extends Component {
         <h1>The Mind</h1>
         <p>Waiting for all players to join...</p>
         <br />
-        <button onClick={this.beginGame.bind(this)}>Start Game</button>
+        {this.isLeader() && <button onClick={this.props.startGame}>Start Game</button>}
       </div>
     );
   }
