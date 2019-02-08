@@ -40,18 +40,25 @@ class GameScreen extends Component {
     if (!gameState || gameState.round === 0 || !gameState.playerStates[this.myUserId] || gameState.gameStatus === 'HAS_NOT_BEGUN') {
       return <WaitingRoomScreen {...this.props}/>
     } else if (gameState.gameStatus === 'WAITING_FOR_NEXT_ROUND') {
-      return (<h1>Waiting for next round!</h1>);
+      return (
+        <div className="gameBody">
+          <h1>Round passed!</h1>
+          <p>Please wait for the next round to begin.</p>
+        </div>
+      )
     } else if (gameState.gameStatus === 'LOST') {
       return (
-        <div>
-          <h1>you lost 😭😭😭😭</h1>
+        <div className="gameBody">
+          <h1>You lost.</h1>
+          <p>Better luck next time!</p>
           <a href="/"><button>Join New Game</button></a>
         </div>
       )
     } else if (gameState.gameStatus === 'WON') {
       return (
-        <div>
-          <h1>you won!!!</h1>
+        <div className="gameBody">
+          <h1>YOU WON!</h1>
+          <p>Congratulations, your minds were in sync. Now do it again!</p>
           <a href="/"><button>Join New Game</button></a>
         </div>
       )
@@ -67,7 +74,7 @@ class GameScreen extends Component {
           <h3 className="roundAndLives">Round: {gameState.round} of 12 &nbsp;&nbsp;&nbsp;Lives: {gameState.lives}</h3>
 
           {Object.values(gameState.playerStates).map(player =>
-            <div className="playerList">
+            <div className="playerList" key={player.id}>
              <div className="playerListName">
               { player.id === this.myUserId && <span>*</span> }
               {player.id}
