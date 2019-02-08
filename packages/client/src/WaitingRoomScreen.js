@@ -8,13 +8,17 @@ class WaitingRoomScreen extends Component {
     return this.props.gameState && this.props.gameState.gameLeaderPlayerId === getUserName();
   }
 
+  shouldShowStartGameButton() {
+    return this.isLeader() && Object.keys(this.props.gameState.playerStates).length > 2;
+  }
+
   render() {
     return (
       <div className="gameBody">
         <h1>The Mind</h1>
         <p>Waiting for all players to join...</p>
         <br />
-        {this.isLeader() && <button onClick={this.props.startGame}>Start Game</button>}
+        {this.shouldShowStartGameButton() && <button onClick={this.props.startGame}>Start Game</button>}
       </div>
     );
   }
