@@ -61,7 +61,7 @@ function getStartingHand(numPlayers: number, handSize: number): number[][] {
         let endIndex = startIndex + handSize;
         let hand =  shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        return hand;
+        return hand.sort();
         
     });
 }

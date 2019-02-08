@@ -75,10 +75,11 @@ function gameStateReducer(actionIn, stateIn) {
         if (actionIn.type === 'PlayLowestNumberAction' && canExecutePlayLowestNumberAction(actionIn, gameState)) {
             var action = actionIn;
             var userState = gameState.playerStates[action.userId];
-            var numberToPlay = userState.cards[0];
+            var nextDiscard = userState.cards[0];
             userState.cards.shift();
             var numDiscarded = gameState.discardedCards.length;
-            if (numDiscarded > 0 && gameState.discardedCards[numDiscarded - 1] < numberToPlay) {
+            var lastDiscard = gameState.discardedCards[numDiscarded - 1];
+            if (numDiscarded > 0 && lastDiscard > nextDiscard) {
                 gameState.gameStatus = 'LOST';
             }
             else if (doAllPlayersHaveZeroCards(gameState) && gameState.round + 1 === getMaxRounds(gameState)) {
@@ -87,7 +88,7 @@ function gameStateReducer(actionIn, stateIn) {
             else if (doAllPlayersHaveZeroCards(gameState)) {
                 gameState.gameStatus = 'WAITING_FOR_NEXT_ROUND';
             }
-            gameState.discardedCards.push(numberToPlay);
+            gameState.discardedCards.push(nextDiscard);
         }
         else if ((actionIn.type === 'BeginGameAction' && canExecuteBeginGameAction(actionIn, gameState))
             || (actionIn.type === 'BeginNextRoundAction' && canExecuteBeginNextRoundAction(actionIn, gameState))) {
@@ -99,6 +100,9 @@ function gameStateReducer(actionIn, stateIn) {
             getStartingHand(playerIds_1.length, gameState.round).forEach(function (numbers, index) {
                 gameState.playerStates[playerIds_1[index]].cards = numbers;
             });
+            if (actionIn.type === 'BeginGameAction') {
+                gameState.lives = playerIds_1.length;
+            }
         }
         else if (actionIn.type === 'JoinGameAction' && canExecuteJoinGameAction(actionIn, gameState)) {
             var action = actionIn;
