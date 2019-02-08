@@ -34,7 +34,6 @@ class GameScreen extends Component {
 
   render() {
     let gameState = this.props.gameState;
-    let myUserId = getUserName();
     console.log('gameState', gameState)
 
     if (!gameState || gameState.round === 0 || !gameState.playerStates[this.myUserId] || gameState.gameStatus === 'HAS_NOT_BEGUN') {
@@ -47,7 +46,7 @@ class GameScreen extends Component {
       return (<h1>you won 🙌🙌🙌🙌🙌</h1>)
     }
 
-    let myCards = gameState.playerStates[myUserId].cards;
+    let myCards = gameState.playerStates[this.myUserId].cards;
     let outOfCards = !myCards.length;
 
     return (
@@ -59,7 +58,7 @@ class GameScreen extends Component {
           {Object.values(gameState.playerStates).map(player =>
             <div className="playerList">
              <div className="playerListName">
-              { player.id === myUserId && <span>*</span> }
+              { player.id === this.myUserId && <span>*</span> }
               {player.id}
              </div>
               <div>{player.cards.length} cards left</div>
