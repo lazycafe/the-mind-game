@@ -23,9 +23,7 @@ function getStartingHands(numPlayers, handSize) {
         var endIndex = startIndex + handSize;
         var hand = shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        var sorted = hand.sort();
-        sorted.sort();
-        return sorted;
+        return hand;
     });
 }
 function canExecuteJoinGameAction(action, state) {
@@ -100,8 +98,7 @@ function gameStateReducer(actionIn, stateIn) {
             gameState.discardedCards = [];
             var playerIds_1 = Object.keys(gameState.playerStates);
             getStartingHands(playerIds_1.length, gameState.round).forEach(function (numbers, index) {
-                gameState.playerStates[playerIds_1[index]].cards = numbers.sort();
-                gameState.playerStates[playerIds_1[index]].cards.sort();
+                gameState.playerStates[playerIds_1[index]].cards = numbers.sort(function (a, b) { return a - b; });
             });
             if (actionIn.type === 'BeginGameAction') {
                 gameState.lives = playerIds_1.length;

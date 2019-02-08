@@ -111,6 +111,22 @@ function canExecuteBeginNextRoundAction(action: BeginNextRoundAction, state: Gam
     return doAllPlayersHaveZeroCards(state);
 }
 
+function loseLifeIfLastCardDiscardedWasntLowest(state: GameState, nextDiscard: number) {
+    const shouldLoseLife = Object.keys(state.playerStates)
+        .map(id => state.playerStates[id].cards)
+        .reduce(
+            function(accumulator, currentValue) {
+              return accumulator.concat(currentValue);
+            },
+            []
+        )
+        .filter(num => num < nextDiscard)
+        .length > 0;
+    if (shouldLoseLife) {
+        state.lives = state.lives - 1;
+    } 
+}
+
 export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
     return produce(stateIn, (gameState) => {
         if (actionIn.type === 'PlayLowestNumberAction' && canExecutePlayLowestNumberAction(actionIn, gameState)) {
@@ -119,8 +135,8 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             let nextDiscard = userState.cards[0];
             userState.cards.shift();
             const numDiscarded = gameState.discardedCards.length;
-            const lastDiscard = gameState.discardedCards[numDiscarded - 1];
-            if (numDiscarded > 0 && lastDiscard > nextDiscard) {
+            loseLifeIfLastCardDiscardedWasntLowest(gameState, numDiscarded);
+            if (gameState.lives === 0) {
                 gameState.gameStatus = 'LOST';
             } else if (doAllPlayersHaveZeroCards(gameState) && gameState.round + 1 === getMaxRounds(gameState)) {
                 gameState.gameStatus = 'WON'
