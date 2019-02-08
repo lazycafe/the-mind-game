@@ -141,6 +141,10 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             getStartingHand(playerIds.length, gameState.round).forEach((numbers, index) => {
                 gameState.playerStates[playerIds[index]].cards = numbers;
             });
+
+            if (actionIn.type === 'BeginGameAction') {
+                gameState.lives = playerIds.length;
+            }
         } else if (actionIn.type === 'JoinGameAction' && canExecuteJoinGameAction(actionIn, gameState)) {
             let action: JoinGameAction = actionIn;
             gameState.playerStates[action.userId] = {
