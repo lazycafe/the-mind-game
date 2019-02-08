@@ -32,6 +32,7 @@ class GameScreen extends Component {
     this.props.joinGame(this.myUserId, this.gameId);
   }
 
+
   render() {
     let gameState = this.props.gameState;
     console.log('gameState', gameState)
@@ -41,7 +42,12 @@ class GameScreen extends Component {
     } else if (gameState.gameStatus === 'WAITING_FOR_NEXT_ROUND') {
       return (<h1>Waiting for next round!</h1>);
     } else if (gameState.gameStatus === 'LOST') {
-      return (<h1>you lost 😭😭😭😭</h1>)
+      return (
+        <div>
+          <h1>you lost 😭😭😭😭</h1>
+          <a href="/"><button>Join New Game</button></a>
+        </div>
+      )
     } else if (gameState.gameStatus === 'WON') {
       return (<h1>you won 🙌🙌🙌🙌🙌</h1>)
     }
