@@ -61,9 +61,7 @@ function getStartingHands(numPlayers: number, handSize: number): number[][] {
         let endIndex = startIndex + handSize;
         let hand =  shuffledNumbers.slice(startIndex, endIndex);
         startIndex = endIndex;
-        let sorted = hand.sort();
-        sorted.sort();
-        return sorted;
+        return hand;
     });
 }
 
@@ -141,8 +139,7 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             gameState.discardedCards = [];
             let playerIds = Object.keys(gameState.playerStates);
             getStartingHands(playerIds.length, gameState.round).forEach((numbers, index) => {
-                gameState.playerStates[playerIds[index]].cards = numbers.sort();
-                gameState.playerStates[playerIds[index]].cards.sort();
+                gameState.playerStates[playerIds[index]].cards = numbers.sort((a, b) => a-b);
             });
 
             if (actionIn.type === 'BeginGameAction') {

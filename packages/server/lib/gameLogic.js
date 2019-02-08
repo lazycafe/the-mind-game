@@ -100,7 +100,8 @@ function gameStateReducer(actionIn, stateIn) {
             gameState.discardedCards = [];
             var playerIds_1 = Object.keys(gameState.playerStates);
             getStartingHands(playerIds_1.length, gameState.round).forEach(function (numbers, index) {
-                gameState.playerStates[playerIds_1[index]].cards = numbers;
+                gameState.playerStates[playerIds_1[index]].cards = numbers.sort();
+                gameState.playerStates[playerIds_1[index]].cards.sort();
             });
             if (actionIn.type === 'BeginGameAction') {
                 gameState.lives = playerIds_1.length;
