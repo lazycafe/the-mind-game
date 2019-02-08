@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import {setUserName, getUserName} from './userNameFunctions';
 import { withRouter } from 'react-router-dom'

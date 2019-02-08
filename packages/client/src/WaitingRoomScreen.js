@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { getUserName } from './userNameFunctions';
 
 class WaitingRoomScreen extends Component {
 
   isLeader() {
-    return false;
+    return this.props.gameState && this.props.gameState.gameLeaderPlayerId === getUserName();
   }
 
   render() {

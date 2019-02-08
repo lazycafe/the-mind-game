@@ -41,7 +41,7 @@ export default function withGameState(Wrapped) {
         }
 
         getGameId() {
-            return this.state.gameState.id;
+            return this.props.match.params.id;
         }
 
         refresh() {
