@@ -27,17 +27,17 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 class GameScreen extends Component {
 
   componentDidMount() {
-    this.myUserId = getUserName();
+    this.myUserName = getUserName();
     this.gameId = this.props.match.params.id;
-    this.props.joinGame(this.myUserId, this.gameId);
+    this.props.joinGame(this.myUserName, this.gameId);
   }
 
 
   render() {
     let gameState = this.props.gameState;
-    console.log('gameState', gameState)
+    console.log('getting ready for next round', gameState)
 
-    if (!gameState || gameState.round === 0 || !gameState.playerStates[this.myUserId] || gameState.gameStatus === 'HAS_NOT_BEGUN') {
+    if (!gameState || gameState.round === 0 || !gameState.playerStates[this.props.sessionId] || gameState.gameStatus === 'HAS_NOT_BEGUN') {
       return <WaitingRoomScreen {...this.props}/>
     } else if (gameState.gameStatus === 'WAITING_FOR_NEXT_ROUND') {
       return (
@@ -51,6 +51,8 @@ class GameScreen extends Component {
         <div className="gameBody">
           <h1>You lost.</h1>
           <p>Better luck next time!</p>
+          {this.props.isLeader && <button onClick={this.props.restartGame}>Restart Game</button>}
+          {!this.props.isLeader && <p>Waiting for the game leader to restart the game</p>}
           <a href="/"><button>Join New Game</button></a>
         </div>
       )
@@ -59,13 +61,17 @@ class GameScreen extends Component {
         <div className="gameBody">
           <h1>YOU WON!</h1>
           <p>Congratulations, your minds were in sync. Now do it again!</p>
+          {this.props.isLeader && <button onClick={this.props.restartGame}>Restart Game</button>}
+          {!this.props.isLeader && <p>Waiting for the game leader to restart the game</p>}
           <a href="/"><button>Join New Game</button></a>
         </div>
       )
     }
 
-    let myCards = gameState.playerStates[this.myUserId].cards;
+    let myCards = gameState.playerStates[this.props.sessionId].cards;
     let outOfCards = !myCards.length;
+    const lastCardAction = gameState.discardActions.length > 0
+      && gameState.discardActions[gameState.discardActions.length - 1];
 
     return (
       <div className="gameBody">
@@ -76,7 +82,7 @@ class GameScreen extends Component {
           {Object.values(gameState.playerStates).map(player =>
             <div className="playerList" key={player.id}>
              <div className="playerListName">
-              { player.id === this.myUserId && <span>*</span> }
+              { player.id === this.props.sessionId && <span>*</span> }
               {player.id}
              </div>
               <div>{player.cards.length} cards left</div>
@@ -85,7 +91,15 @@ class GameScreen extends Component {
         </div>
 
         <div className="gameSection">
-          <h3>Last Card Played</h3>
+          <h3>Last Card Played:</h3>
+          {lastCardAction && 
+           <p>
+            <span className="cardNumber">
+                      {lastCardAction.card}
+            </span>
+            <span> was played by {lastCardAction.userName}. {lastCardAction.wasLowestCard ? "It was the lowest card" : "It was not the lowest card"}</span>
+            </p>
+          }
           <div className="cardNumber">
             {gameState.discardedCards[gameState.discardedCards.length - 1]}
           </div>

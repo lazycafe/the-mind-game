@@ -12,11 +12,17 @@ export type GameState = {
         [playerId: string]: PlayerState
     },
     discardedCards: number[]
+    discardActions: {
+        userName: string
+        card: number
+        wasLowestCard: boolean
+    }[]
     lives: number
 }
 
 type PlayerState = {
     id: string
+    name: string
     cards: number[]
 }
 
@@ -28,26 +34,45 @@ export function getDefaultGameState(id: string): GameState {
         gameStatus: 'HAS_NOT_BEGUN',
         playerStates: {},
         discardedCards: [],
+        discardActions: [],
         lives: 0
     }
 }
 
-type PlayLowestNumberAction = {
+export type GameAction = PlayLowestNumberAction
+    | BeginGameAction
+    | JoinGameAction 
+    | BeginNextRoundAction
+    | LeaveGameAction
+    | RestartGameAction;
+
+export type PlayLowestNumberAction = {
     type: 'PlayLowestNumberAction'
     userId: string
 }
 
-type BeginGameAction = {
+export type BeginGameAction = {
     type: 'BeginGameAction'
     userId: string
 }
 
-type JoinGameAction = {
-    type: 'JoinGameAction'
+export type RestartGameAction = {
+    type: 'RestartGameAction'
     userId: string
 }
 
-type BeginNextRoundAction = {
+export type JoinGameAction = {
+    type: 'JoinGameAction'
+    userId: string
+    userName: string
+}
+
+export type LeaveGameAction = {
+    type: 'LeaveGameAction'
+    userId: string
+}
+
+export type BeginNextRoundAction = {
     type: 'BeginNextRoundAction'
 }
 
@@ -65,10 +90,13 @@ function getStartingHands(numPlayers: number, handSize: number): number[][] {
     });
 }
 
+function canExecuteRestartGameAction(action: RestartGameAction, state: GameState) {
+    return (state.gameStatus === 'LOST' || state.gameStatus === 'WON')
+        && state.gameLeaderPlayerId === action.userId;
+}
+
 function canExecuteJoinGameAction(action: JoinGameAction, state: GameState) {
-    return state.gameStatus === 'HAS_NOT_BEGUN'
-        && !state.playerStates[action.userId]
-        && Object.keys(state.playerStates).length < 5;
+    return !state.playerStates[action.userId];
 }
 
 function canExecutePlayLowestNumberAction(action: PlayLowestNumberAction, state: GameState): boolean {
@@ -81,6 +109,10 @@ function canExecuteBeginGameAction(action: BeginGameAction, state: GameState): b
     return action.userId === state.gameLeaderPlayerId
         && Object.keys(state.playerStates).length > 1
         && state.gameStatus === 'HAS_NOT_BEGUN';
+}
+
+function canExecuteLeaveGameAction(action: LeaveGameAction, state: GameState) {
+    return Boolean(state.playerStates[action.userId]);
 }
 
 export function getMaxRounds(state: GameState) {
@@ -97,6 +129,8 @@ export function getMaxRounds(state: GameState) {
         return 8;
     } else if (numPlayers === 5) {
         return 6;
+    } else {
+        return 5;
     }
 }
 
@@ -111,48 +145,73 @@ function canExecuteBeginNextRoundAction(action: BeginNextRoundAction, state: Gam
     return doAllPlayersHaveZeroCards(state);
 }
 
-function loseLifeIfLastCardDiscardedWasntLowest(state: GameState, nextDiscard: number) {
-    const shouldLoseLife = Object.keys(state.playerStates)
+function isLowestCard(state: GameState, card: number) {
+    const isLowestNumber = Object.keys(state.playerStates)
         .map(id => state.playerStates[id].cards)
         .reduce(
             function(accumulator, currentValue) {
-              return accumulator.concat(currentValue);
+            return accumulator.concat(currentValue);
             },
             []
         )
-        .filter(num => num < nextDiscard)
-        .length > 0;
-    if (shouldLoseLife) {
+        .filter(num => num < card)
+        .length === 0;
+    return isLowestNumber;
+}
+
+function loseLifeIfLastCardDiscardedWasntLowest(state: GameState, nextDiscard: number) {
+    const didDiscardLowest = isLowestCard(state, nextDiscard);
+    console.log('should lose life?', !didDiscardLowest);
+    if (!didDiscardLowest) {
         state.lives = state.lives - 1;
     } 
 }
 
-export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
+function updateGameStatus(gameState: GameState) {
+    if (gameState.gameStatus !== 'IN_PROGRESS') { return; }
+
+    if (gameState.lives === 0) {
+        gameState.gameStatus = 'LOST';
+    } else if (doAllPlayersHaveZeroCards(gameState) && gameState.round + 1 > getMaxRounds(gameState)) {
+        gameState.gameStatus = 'WON'
+    } else if (doAllPlayersHaveZeroCards(gameState)) {
+        gameState.gameStatus = 'WAITING_FOR_NEXT_ROUND';
+    }
+}
+
+function ensureThereIsAGameLeader(gameState: GameState) {
+    if (!gameState.gameLeaderPlayerId) {
+        const players = Object.keys(gameState.playerStates);
+        if (players.length > 0) {
+            gameState.gameLeaderPlayerId = players[0];
+        }
+    }
+}
+
+export function gameStateReducer(actionIn: GameAction, stateIn: GameState): GameState {
+    console.log('game: ', stateIn.id, 'action: ', actionIn);
     return produce(stateIn, (gameState) => {
         if (actionIn.type === 'PlayLowestNumberAction' && canExecutePlayLowestNumberAction(actionIn, gameState)) {
             let action: PlayLowestNumberAction = actionIn;
             let userState = gameState.playerStates[action.userId];
             let nextDiscard = userState.cards[0];
             userState.cards.shift();
-            const numDiscarded = gameState.discardedCards.length;
-            loseLifeIfLastCardDiscardedWasntLowest(gameState, numDiscarded);
-            if (gameState.lives === 0) {
-                gameState.gameStatus = 'LOST';
-            } else if (doAllPlayersHaveZeroCards(gameState) && gameState.round + 1 === getMaxRounds(gameState)) {
-                gameState.gameStatus = 'WON'
-            } else if (doAllPlayersHaveZeroCards(gameState)) {
-                gameState.gameStatus = 'WAITING_FOR_NEXT_ROUND';
-            }
+            loseLifeIfLastCardDiscardedWasntLowest(gameState, nextDiscard);
+            updateGameStatus(gameState);
             gameState.discardedCards.push(nextDiscard);
-            
+            gameState.discardActions.push({
+                card: nextDiscard,
+                wasLowestCard: isLowestCard(gameState, nextDiscard),
+                userName: userState.name
+            });
         } else if (
             (actionIn.type === 'BeginGameAction' && canExecuteBeginGameAction(actionIn, gameState))
             || (actionIn.type === 'BeginNextRoundAction' && canExecuteBeginNextRoundAction(actionIn, gameState))
             ) {
-            let action: BeginGameAction = actionIn;
             gameState.round = gameState.round + 1;
             gameState.gameStatus = 'IN_PROGRESS';
             gameState.discardedCards = [];
+            gameState.discardActions = [];
             let playerIds = Object.keys(gameState.playerStates);
             getStartingHands(playerIds.length, gameState.round).forEach((numbers, index) => {
                 gameState.playerStates[playerIds[index]].cards = numbers.sort((a, b) => a-b);
@@ -165,15 +224,35 @@ export function gameStateReducer(actionIn: any, stateIn: GameState): GameState {
             let action: JoinGameAction = actionIn;
             gameState.playerStates[action.userId] = {
                 id: action.userId,
+                name: action.userName,
                 cards: []
             }
-            if (!gameState.gameLeaderPlayerId) {
-                gameState.gameLeaderPlayerId = action.userId;
+            ensureThereIsAGameLeader(gameState);
+        } else if (actionIn.type === 'LeaveGameAction' && canExecuteLeaveGameAction(actionIn, gameState)) {
+            let action: LeaveGameAction = actionIn;
+            delete gameState.playerStates[action.userId]
+            if (gameState.gameLeaderPlayerId === actionIn.userId) {
+                gameState.gameLeaderPlayerId = '';
+                ensureThereIsAGameLeader(gameState);
             }
+            updateGameStatus(gameState);
+        } else if (actionIn.type === 'RestartGameAction' && canExecuteRestartGameAction(actionIn, gameState)) {
+            let action: RestartGameAction = actionIn;
+            const nextState = getDefaultGameState(gameState.id);
+            nextState.gameStatus = 'HAS_NOT_BEGUN';
+            nextState.gameLeaderPlayerId = gameState.gameLeaderPlayerId;
+            Object.keys(gameState.playerStates).forEach(userId => {
+                const oldUserState = gameState.playerStates[userId];
+                nextState.playerStates[userId] = {
+                    id: userId,
+                    name: oldUserState.name,
+                    cards: []
+                };
+            });
+            return nextState;
         }
         return gameState;
     });
-
 }
 
 /**
