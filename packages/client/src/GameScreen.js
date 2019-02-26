@@ -53,7 +53,7 @@ class GameScreen extends Component {
           <p>Better luck next time!</p>
           {this.props.isLeader && <button onClick={this.props.restartGame}>Restart Game</button>}
           {!this.props.isLeader && <p>Waiting for the game leader to restart the game</p>}
-          <a href="/"><button>Join New Game</button></a>
+          <Link to="/"><button>Join New Game</button></Link>
         </div>
       )
     } else if (gameState.gameStatus === 'WON') {
@@ -63,7 +63,7 @@ class GameScreen extends Component {
           <p>Congratulations, your minds were in sync. Now do it again!</p>
           {this.props.isLeader && <button onClick={this.props.restartGame}>Restart Game</button>}
           {!this.props.isLeader && <p>Waiting for the game leader to restart the game</p>}
-          <a href="/"><button>Join New Game</button></a>
+          <Link to="/"><button>Join New Game</button></Link>
         </div>
       )
     }
@@ -83,7 +83,7 @@ class GameScreen extends Component {
             <div className="playerList" key={player.id}>
              <div className="playerListName">
               { player.id === this.props.sessionId && <span>*</span> }
-              {player.id}
+              {player.name}
              </div>
               <div>{player.cards.length} cards left</div>
             </div>
@@ -94,15 +94,12 @@ class GameScreen extends Component {
           <h3>Last Card Played:</h3>
           {lastCardAction && 
            <p>
-            <span className="cardNumber">
+            <span className={"cardNumber" + (lastCardAction.wasLowestCard ? "" : ' wrongColor')}>
                       {lastCardAction.card}
             </span>
-            <span> was played by {lastCardAction.userName}. {lastCardAction.wasLowestCard ? "It was the lowest card" : "It was not the lowest card"}</span>
+            <span> was played by {lastCardAction.userName}</span>
             </p>
           }
-          <div className="cardNumber">
-            {gameState.discardedCards[gameState.discardedCards.length - 1]}
-          </div>
         </div>
 
         <div className="gameSection">

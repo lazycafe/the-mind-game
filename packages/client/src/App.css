@@ -4,6 +4,7 @@
   --yellow: #CBFF4D;
   --lightgreen: #84DD63;
   --shamrock: #6BAA75;
+  --red: darkred;
   --nickel: #69747C;
   --darkgray: #545454;
   --noto: 'Noto Sans', sans-serif;
@@ -79,6 +80,10 @@ input:focus, button:focus{
   font-size: 35px;
   font-weight: bold;
   color: var(--shamrock);
+}
+
+.wrongColor {
+  color: var(--red);
 }
 
 h3 {

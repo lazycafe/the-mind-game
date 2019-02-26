@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { getUserName } from './userNameFunctions';
 const Colyseus = require('colyseus.js');
 console.log(Colyseus);
-const client = new Colyseus.Client("ws://localhost:2657")
+//const client = new Colyseus.Client("ws://localhost:2657")
+const client = new Colyseus.Client("wss://the-mind-game-server.now.sh");
 
 //actions to emit
 //join game <-- this handles leaving any games you might already be in
