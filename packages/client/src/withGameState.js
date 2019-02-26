@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-import io from 'socket.io-client';
 import { getUserName } from './userNameFunctions';
-
-const socket = io('https://the-mind-server.now.sh');
-
+const Colyseus = require('colyseus.js');
+console.log(Colyseus);
+const client = new Colyseus.Client("ws://localhost:2657")
 
 //actions to emit
 //join game <-- this handles leaving any games you might already be in
-
 
 export default function withGameState(Wrapped) {
     return class extends Component {
@@ -24,12 +22,20 @@ export default function withGameState(Wrapped) {
                     gameState: state
                 });
             }
-            window.socket = socket;
-            socket.on('GAME_UPDATE', this.onGameUpdate);
-        }
-    
-        componentWillUnmount() {
-            socket.off('GAME_UPDATE', this.onGameUpdate);
+
+            this.room.onMessage.add(message => {
+                if (message && message.gameState) {
+                    console.log('setting game state', message);
+                    this.setState({gameState: message.gameState}, () => {
+                        this.forceUpdate();
+                    });
+                }
+            });
+            this.room.listen('', (...args) => {
+                console.log('listen!',...args);
+            })
+            window.room = this.room;
+
         }
     
         notInGame() {
@@ -37,7 +43,10 @@ export default function withGameState(Wrapped) {
         }
 
         getUserId() {
-            return getUserName();
+            if (!this.room) {
+                return '';
+            }
+            return this.room.sessionId;
         }
 
         getGameId() {
@@ -45,46 +54,52 @@ export default function withGameState(Wrapped) {
         }
 
         refresh() {
-            if (this.gameId && this.userId) {}
-            socket.emit('GAME_ACTION', {
-                gameId: this.getGameId(),
-                action: {
-                    type: 'RefreshAction',
-                    userId: this.getUserId()
-                }
-            })
+            
         }
     
-        joinGame(userId, gameId) {
-            socket.emit('GAME_ACTION', {
-                gameId: this.getGameId(),
-                action: {
-                    type: 'JoinGameAction',
-                    userId: this.getUserId()
-                }
-            })
-        }
-    
-        startGame() {
-            socket.emit('GAME_ACTION', {
-                gameId: this.getGameId(),
-                action: {
-                    type: 'BeginGameAction',
-                    userId: this.getUserId()
-                }
-            })
-        }
-    
-        playLowestCard() {
-            socket.emit('GAME_ACTION', {
-                gameId: this.getGameId(),
-                action: {
-                    type: 'PlayLowestNumberAction',
-                    userId: this.getUserId()
-                }
+        joinGame(name, gameId) {
+            this.room = client.join('game', {
+                gameId,
+                userName: name
             });
         }
 
+        restartGame() {
+            const action = {
+                type: 'RestartGameAction',
+                userId: this.getUserId()
+            }
+
+            this.room.send(action);
+        }
+    
+        startGame() {
+            const action = {
+                type: 'BeginGameAction',
+                userId: this.getUserId()
+            }
+
+            this.room.send(action);
+        }
+    
+        isLeader() {
+            if (!this.state || !this.room) {
+                return false;
+            }
+            const gameState = this.state.gameState;
+            return gameState && gameState.gameLeaderPlayerId === this.room.sessionId;
+        }
+
+        playLowestCard() {
+            const action = {
+                type: 'PlayLowestNumberAction',
+                userId: this.getUserId()
+            };
+
+            this.room.send(action);
+        }
+
+        
         render() {
             return (<Wrapped
                 playLowestCard={this.playLowestCard.bind(this)}
@@ -93,6 +108,9 @@ export default function withGameState(Wrapped) {
                 refresh={this.refresh.bind(this)}
                 lastAction={this.state.lastAction}
                 gameState={this.state.gameState}
+                restartGame={this.restartGame.bind(this)}
+                sessionId={this.getUserId()}
+                isLeader={this.isLeader()}
             {...this.props} />);
         }
     }
