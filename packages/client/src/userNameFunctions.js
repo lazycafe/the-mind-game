@@ -1,5 +1,7 @@
 const userNameKeyId = 'userNameKey';
 
+
+
 export function getUserName(shouldSetDefault = true) {
     let userName = localStorage.getItem(userNameKeyId);
     if (!userName && shouldSetDefault) {

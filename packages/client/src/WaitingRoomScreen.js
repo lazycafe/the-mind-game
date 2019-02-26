@@ -5,7 +5,6 @@ import { getUserName } from './userNameFunctions';
 class WaitingRoomScreen extends Component {
 
   shouldShowStartGameButton() {
-    console.log('here', this.props);
     return this.props.isLeader && Object.keys(this.props.gameState.playerStates).length > 1;
   }
 
@@ -23,13 +22,10 @@ class WaitingRoomScreen extends Component {
       <div className="gameBody">
         <h1>The Mind</h1>
         <p>Waiting for all players to join...</p>
-        <p>Current Users</p>
-        <ul>
           {
             this.getPlayers()
-              .map(id => (<li>{id}</li>))
+              .map(name => (<p>{name}</p>))
           }
-        </ul>
         <br />
         {this.shouldShowStartGameButton() && <button onClick={this.props.startGame}>Start Game</button>}
       </div>

@@ -1,28 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 import withGameState from './withGameState';
+import {withUserNameGate} from './UserNameGate';
 import WaitingRoomScreen from './WaitingRoomScreen';
 import {setUserName, getUserName} from './userNameFunctions';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-
-// const exampleGameState = {
-//     round: 1,
-//     totalRounds: 12,
-//     gameLeaderPlayerId: '',
-//     gameStatus: 'IN_PROGRESS',
-//     playerStates: {
-//         'andrealized': {
-//             id: 'andrealized',
-//             cards: [15,27,22]
-//         },
-//         'jmoneyswagtime': {
-//             id: 'jmoneyswagtime',
-//             cards: [4,89,24]
-//         }
-//     },
-//     discardedCards: [1, 5, 6],
-//     lives: 2
-// }
 
 class GameScreen extends Component {
 
@@ -120,4 +102,8 @@ class GameScreen extends Component {
   }
 }
 
-export default withGameState(GameScreen);
+export default withUserNameGate(
+  withGameState(
+    GameScreen
+  )
+);

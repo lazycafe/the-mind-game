@@ -5,7 +5,7 @@ import JoinGameScreen from './JoinGameScreen';
 import GameScreen from './GameScreen';
 import * as serviceWorker from './serviceWorker';
 import { HashRouter } from 'react-router-dom'
-import { Switch, Route } from 'react-router-dom'
+import { Switch, Route, Link } from 'react-router-dom'
 ReactDOM.render(
     <HashRouter>
         <Switch>
